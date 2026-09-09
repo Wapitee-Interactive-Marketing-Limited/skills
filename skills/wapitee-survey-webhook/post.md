@@ -1,16 +1,16 @@
 # Survey webhook POST
 
-输入齐了再写这份 helper。常量按入口表替换；表单提交只调用 `submitSurvey`。
+Write this helper after inputs are complete. Replace the constants from the table below; form submit calls `submitSurvey` only.
 
-| 框架 | 文件 | 常量 |
+| Framework | File | Constants |
 |------|------|------|
-| Next.js App Router | `app/actions/survey.ts`，文件顶 `'use server'` | `process.env.WAPITEE_SURVEY_WEBHOOK_URL` / `WAPITEE_SURVEY_WEBHOOK_SECRET`；同步写 `.env.local` |
-| Node / Express | 服务端路由（如 `routes/survey.js`）转发 | 同上，写 `.env` |
-| React / Vue / HTML（无后端） | `lib/surveyWebhook.ts` 或页面 `<script>` | 用户给的字面量；Secret 会出现在源码 |
+| Next.js App Router | `app/actions/survey.ts`, `'use server'` at the top | `process.env.WAPITEE_SURVEY_WEBHOOK_URL` / `WAPITEE_SURVEY_WEBHOOK_SECRET`; write `.env.local` in the same step |
+| Node / Express | Server route (e.g. `routes/survey.js`) as a proxy | Same env names; write `.env` |
+| React / Vue / HTML (no backend) | `lib/surveyWebhook.ts` or a page `<script>` | Literals the user supplied; Secret will appear in source |
 
 ```ts
-const WEBHOOK_URL = /* 入口表 */;
-const WEBHOOK_SECRET = /* 入口表 */;
+const WEBHOOK_URL = /* from the table */;
+const WEBHOOK_SECRET = /* from the table */;
 
 export async function submitSurvey(data: {
   email: string;
@@ -45,11 +45,11 @@ export async function submitSurvey(data: {
 }
 ```
 
-Next.js `.env.local` / Node `.env`：
+Next.js `.env.local` / Node `.env`:
 
 ```
 WAPITEE_SURVEY_WEBHOOK_URL=
 WAPITEE_SURVEY_WEBHOOK_SECRET=
 ```
 
-Express 在路由里调 `submitSurvey`，上游非 2xx 时对本请求返回 502。Vue 可 `export function useSurveyWebhook() { return { submitSurvey } }`。
+Express calls `submitSurvey` from the route and returns 502 to the caller when the upstream status is not 2xx. Vue may `export function useSurveyWebhook() { return { submitSurvey } }`.

@@ -1,23 +1,19 @@
 # TyphoonX tracker
 
-输入齐了再写这份 helper。常量按入口表替换；业务代码只调用 `typhoonxTrack`。
+Write this helper after inputs are complete. Replace the constants from the table below; business code calls `typhoonxTrack` only.
 
-```
-https://spell.typhoonx.io/api/v1/receive
-```
-
-| 框架 | 文件 | 常量 |
+| Framework | File | Constants |
 |------|------|------|
-| Next.js | `lib/typhoonx.ts`，文件顶 `'use client'` | `process.env.NEXT_PUBLIC_TYPHOONX_MERCHANT_ID` / `SHOP_ID` / `COOKIE_DOMAIN`；同步写 `.env.local` |
-| React / Vite | `lib/typhoonx.ts` | Vite 用 `import.meta.env.VITE_TYPHOONX_*`，否则用用户给的字面量 |
-| Vue 3 | `composables/useTyphoonx.ts`，末尾 `export function useTyphoonx() { return { track: typhoonxTrack } }` | `import.meta.env.VITE_TYPHOONX_*` |
-| HTML | 页面 `<script>` | 字面量 |
+| Next.js | `lib/typhoonx.ts`, `'use client'` at the top | `process.env.NEXT_PUBLIC_TYPHOONX_MERCHANT_ID` / `SHOP_ID` / `COOKIE_DOMAIN`; write `.env.local` in the same step |
+| React / Vite | `lib/typhoonx.ts` | Vite: `import.meta.env.VITE_TYPHOONX_*`; otherwise literals the user supplied |
+| Vue 3 | `composables/useTyphoonx.ts`, ending `export function useTyphoonx() { return { track: typhoonxTrack } }` | `import.meta.env.VITE_TYPHOONX_*` |
+| HTML | Page `<script>` | Literals |
 
 ```ts
 const TYPHOONX_API = 'https://spell.typhoonx.io/api/v1/receive';
-const MERCHANT_ID = /* 入口表 */;
-const SHOP_ID = /* 入口表，没有则 '' */;
-const COOKIE_DOMAIN = /* 入口表，没有则 '' */;
+const MERCHANT_ID = /* from the table */;
+const SHOP_ID = /* from the table; '' if absent */;
+const COOKIE_DOMAIN = /* from the table; '' if absent */;
 
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
@@ -78,7 +74,7 @@ export function typhoonxTrack(eventName: string, params?: Record<string, unknown
 }
 ```
 
-Next.js `.env.local`：
+Next.js `.env.local`:
 
 ```
 NEXT_PUBLIC_TYPHOONX_MERCHANT_ID=
@@ -86,4 +82,4 @@ NEXT_PUBLIC_TYPHOONX_SHOP_ID=
 NEXT_PUBLIC_TYPHOONX_COOKIE_DOMAIN=
 ```
 
-`page_view`：App Router 用客户端组件在根 layout 调一次；SPA 在根组件 mount 或 `router.afterEach` 调一次。
+`page_view`: App Router fires once from a client component in the root layout; an SPA fires once on root mount or `router.afterEach`.

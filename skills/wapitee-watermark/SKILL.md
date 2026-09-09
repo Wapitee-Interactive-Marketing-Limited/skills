@@ -1,50 +1,46 @@
 ---
 name: wapitee-watermark
-description: "Wapitee 水印 / watermark。向 Web 项目 <head> 注入官方 console 彩蛋 CDN 脚本；排查水印缺失；把旧版内联 ASCII 或 console.log 迁到该脚本。"
+description: "Wapitee watermark. Inject the official console easter-egg CDN into a web project's <head>; diagnose a missing watermark; migrate leftover inline ASCII or console.log."
 ---
 
 # Wapitee Watermark
 
-一行 **CDN 脚本** 在 DevTools Console 打出品牌水印。Logo、颜色 `#E42767`、文案都在脚本内固化；项目只在 **入口** 的 `<head>` 最前插入这一行。
-
-```
-https://cdn.jsdelivr.net/gh/Wapitee-Interactive-Marketing-Limited/console-easter-egg@main/index.js
-```
+One **CDN script** prints the brand watermark in the DevTools Console. Logo, color `#E42767`, and copy live inside the script; the project inserts this line first in the **entry** `<head>`.
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/Wapitee-Interactive-Marketing-Limited/console-easter-egg@main/index.js"></script>
 ```
 
-同步加载（省略 `async` / `defer`），紧跟 charset。`src` 用官方地址原样；内网不可达时镜像同一份 JS，不改内容。一项目一份。
+Synchronous load (omit `async` / `defer`), immediately after charset. Use that official `src` as written; if jsDelivr is unreachable, host a byte-identical copy. One script per project.
 
-## 1. 判定框架与水印状态
+## 1. Classify framework and watermark
 
-扫描仓库，识别框架（见入口表）并归入三种状态之一：
+Scan the repo, identify the framework (see the entry table), and assign exactly one state:
 
-| 状态 | 判定 |
+| State | Signal |
 |------|------|
-| 已有 CDN | 出现 `console-easter-egg`，或 `script src` 含 `Wapitee-Interactive-Marketing-Limited` |
-| 残留 | 项目源码里有内联 ASCII / `console.log`，文案含 `Crafted with ❤️ by Wapitee` 或 `hi@wapitee.io`，且不是上面那份 CDN 脚本 |
-| 缺失 | 两者都无 |
+| CDN present | `console-easter-egg`, or a `script src` containing `Wapitee-Interactive-Marketing-Limited` |
+| leftover | Inline ASCII / `console.log` whose copy includes `Crafted with ❤️ by Wapitee` or `hi@wapitee.io`, and is not that CDN script |
+| missing | neither |
 
-已有 CDN → 不改文件，进入报告。残留 → 删掉内联代码后再注入（已有 CDN 则只删残留，不第二份脚本）。缺失 → 注入。
+CDN present → skip to the report. leftover → delete the inline code, then inject (if a CDN script is already there, delete leftover only). missing → inject.
 
-**完成**：框架已识别，且状态为上表三者之一。
+**Done when**: framework is identified and state is exactly one row in the table.
 
-## 2. 按入口注入
+## 2. Inject at the entry
 
-打开项目里真实的入口文件（没有 `_document.tsx` 就按 Next 惯例新建；App Router 没有 `<head>` 就加上）。把 CDN 脚本放在该入口 `<head>` 最前，不要放进组件 `useEffect` / `onMounted` / `useHead`。
+Open the project's real entry file (create `_document.tsx` when Pages Router has none; add an explicit `<head>` when App Router has none). Put the CDN script first in that entry `<head>` — the document head, before any component runs.
 
-| 框架 | 入口 | 插入点 |
-|------|------|--------|
-| Next.js App Router | `app/layout.tsx` | `<html>` 内显式 `<head>` 最前。该行加 `// eslint-disable-next-line @next/next/no-sync-scripts` |
-| Next.js Pages Router | `pages/_document.tsx` | `next/document` 的 `<Head>` 最前 |
-| Vite / CRA / Vue | 根目录 `index.html` | `<head>` 最前 |
-| Nuxt 3 | `nuxt.config.ts` | `app.head.script`（见下） |
-| 纯 HTML | `index.html` | `<head>` 最前 |
-| 未知 | 用户入口 HTML | 把同一行 `<script>` 交给用户粘贴 |
+| Framework | Entry | Insert at |
+|------|------|------|
+| Next.js App Router | `app/layout.tsx` | First in an explicit `<head>` inside `<html>`. Add `// eslint-disable-next-line @next/next/no-sync-scripts` on that line |
+| Next.js Pages Router | `pages/_document.tsx` | First in `next/document`'s `<Head>` |
+| Vite / CRA / Vue | Root `index.html` | First in `<head>` |
+| Nuxt 3 | `nuxt.config.ts` | `app.head.script` (shape below) |
+| Plain HTML | `index.html` | First in `<head>` |
+| Unknown | The user's entry HTML | Hand them the same `<script>` line to paste |
 
-Nuxt 的形状不是 HTML 标签：
+Nuxt's shape is config, not an HTML tag:
 
 ```ts
 export default defineNuxtConfig({
@@ -60,23 +56,23 @@ export default defineNuxtConfig({
 });
 ```
 
-**完成**：入口 `<head>` 最前恰好一份 CDN 脚本；残留已清。
+**Done when**: the entry `<head>` starts with exactly one CDN script; leftover is gone.
 
-## 3. 报告
+## 3. Report
 
 ```
-### 变更摘要
-- 框架: [Next.js App Router / Pages Router / Vite / Vue / Nuxt / HTML / 未知]
-- 注入位置: [文件路径]
-- 状态: [已注入 / 已存在，跳过 / 已从旧版迁移到 CDN]
+### Change summary
+- Framework: [Next.js App Router / Pages Router / Vite / Vue / Nuxt / HTML / unknown]
+- Injected at: [file path]
+- State: [injected / already present, skipped / migrated leftover to CDN]
 
-### 核对
-- [ ] DevTools Console：Logo → "Crafted with ❤️ by Wapitee" → "Contact us 👉 hi@wapitee.io"
-- [ ] 颜色 #E42767；刷新后仍在加载早期出现
-- [ ] 项目里只有一份 CDN 脚本，残留内联已清理
+### Checks
+- [ ] DevTools Console: Logo → "Crafted with ❤️ by Wapitee" → "Contact us 👉 hi@wapitee.io"
+- [ ] Color #E42767; still appears early after refresh
+- [ ] One CDN script in the project; leftover inline is gone
 
-### 更新后的代码
-[修改后的完整文件，不是 diff]
+### Updated files
+[full file after the change, not a diff]
 ```
 
-**完成**：摘要三字段填齐；有改文件则贴出全文。
+**Done when**: the three summary fields are filled; every changed file is pasted in full.

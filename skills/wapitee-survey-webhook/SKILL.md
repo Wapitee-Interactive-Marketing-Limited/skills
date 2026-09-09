@@ -1,81 +1,81 @@
 ---
 name: wapitee-survey-webhook-setup
-description: "Survey webhook。把站点表单 POST 到 Wapitee Survey；把字段映射成 q_N；核对已有推送的 Secret 与 answers。"
+description: "Survey webhook. POST a site form to Wapitee Survey; map fields to q_N; audit an existing push for Secret and answers."
 ---
 
 # Survey webhook
 
-把邮箱表单 **POST** 到 Wapitee Survey 的 Webhook。`answers` 的键是 `q_1`、`q_2`…（不是前端字段名）。**Secret** 放服务端。
+POST a site email form to the Wapitee Survey webhook. `answers` keys are `q_1`, `q_2`, … — frontend field names stay out of the payload. **Secret** lives on the server.
 
-## 1. 收齐输入
+## 1. Collect inputs
 
-缺任何一项就停，把缺的一次列齐。不编造 Webhook URL 或 Secret。先扫仓库里的表单：能推断的字段名不问。
+Stop when any required input is missing; list every gap in one pass. URL and Secret come from admin. Scan the repo form first; ask only for field names the scan cannot infer.
 
-| 输入 | 必填 | 规则 |
+| Input | Required | Rule |
 |------|------|------|
-| `WEBHOOK_URL` | 是 | wapitee.io/admin → 选定 Survey → Setting > Webhook 接收 → 打开开关 → 复制 URL |
-| `WEBHOOK_SECRET` | 是 | 同一页创建的密钥，请求头 `X-Webhook-Secret` |
-| `FRAMEWORK` | 是 | 先扫仓库；认不出再问 nextjs / react / vue / html / nodejs |
-| 邮箱字段 | 是 | 前端变量名，映射到 payload `email` |
-| 各题字段 | 是 | 每题的前端变量名，按顺序映射到 `q_1`…`q_N`；标明哪些是多选 |
+| `WEBHOOK_URL` | yes | wapitee.io/admin → the Survey → Setting > Webhook 接收 → enable → copy URL |
+| `WEBHOOK_SECRET` | yes | Same page; request header `X-Webhook-Secret` |
+| `FRAMEWORK` | yes | Scan the repo; if unknown, ask nextjs / react / vue / html / nodejs |
+| Email field | yes | Frontend name → payload `email` |
+| Question fields | yes | Frontend name per question, in order → `q_1`…`q_N`; mark which are multi-select |
 
-Webhook URL 提问：
+Ask for the webhook:
 
-> 登录 [wapitee.io/admin](https://wapitee.io/admin) → 创建或选择 Survey → Setting > Webhook 接收 → 打开开关，把 **Webhook URL** 和 **Secret** 发给我。
+> Sign in at [wapitee.io/admin](https://wapitee.io/admin) → create or open the Survey → Setting > Webhook 接收 → turn it on, then send me the **Webhook URL** and **Secret**.
 
-**完成**：URL、Secret、框架已齐；邮箱和每道题都有前端字段名。
+**Done when**: URL, Secret, and framework are present; email and every question have a frontend field name.
 
-## 2. 判定仓库状态
+## 2. Classify the repo
 
-| 状态 | 判定 |
+| State | Signal |
 |------|------|
-| 已有 | 出现 `X-Webhook-Secret`、`WAPITEE_SURVEY_WEBHOOK` 或向 Survey Webhook URL 的 POST |
-| 缺失 | 都无 |
+| present | `X-Webhook-Secret`, `WAPITEE_SURVEY_WEBHOOK`, or a POST to a Survey webhook URL |
+| missing | none of those |
 
-已有 → 按契约补 `email` / `q_N` / Secret 头，不第二份 helper。缺失 → 输入齐之后读 [post.md](post.md) 写入一份。
+present → patch `email` / `q_N` / Secret header to the contract; one helper. missing → once inputs are complete, read [post.md](post.md) and write one helper.
 
-能走服务端就走服务端（Next Server Action 或 Node 转发），Secret 进环境变量。没有后端时才客户端 `fetch`，并写明 Secret 会进源码。
+Prefer a server path (Next Server Action or Node proxy); Secret in an env var. Client `fetch` only when the project has no backend, and state that Secret will ship in source.
 
-**完成**：状态二者居一；推送路径是服务端或已声明的客户端例外。
+**Done when**: state is present or missing; the push path is a server or a declared client exception.
 
-## 3. 契约
+## 3. Contract
 
-| | |
-|--|--|
-| 方法 | `POST` |
-| Headers | `Content-Type: application/json`，`X-Webhook-Secret: <Secret>` |
-| `email` | 必填 string |
-| `answers` | 对象；键严格 `q_1`、`q_2`…`q_N`。单选/文本为 `string`，多选为 `string[]` |
-| `source` | 可选，默认 `'website'` |
-| `metadata` | 可选对象 |
+| Part | Rule |
+|------|------|
+| Method | `POST` |
+| Headers | `Content-Type: application/json`, `X-Webhook-Secret: <Secret>` |
+| `email` | required string |
+| `answers` | object; keys strictly `q_1`, `q_2`, …`q_N`. Single-select / text is `string`; multi-select is `string[]` |
+| `source` | optional, default `'website'` |
+| `metadata` | optional object |
 
-401 / Unauthorized → Secret 头与后台不一致。后台报 `email is required` → payload 缺 `email`。题目对不上 → 键仍是前端字段名。多选只收到一个值 → 没用数组。
+401 / Unauthorized → Secret header does not match admin. Admin says `email is required` → payload omitted `email`. Questions mismatch → keys are still frontend names. Multi-select arrives as one value → not an array.
 
-**完成**：每道题都有对应 `q_N`；多选为数组。
+**Done when**: every question has a `q_N`; multi-select is an array.
 
-## 4. 写入
+## 4. Write
 
-读 [post.md](post.md)。helper 一份；在现有表单提交处组 payload 再调用。成功/失败走项目已有的 toast 或跳转。
+Read [post.md](post.md). One helper; assemble the payload at the existing form submit and call it. Success/failure uses the project's toast or redirect.
 
-**完成**：一份 helper；真实表单提交会发出契约里的 POST。
+**Done when**: one helper exists; a real form submit sends the contract POST.
 
-## 5. 报告
+## 5. Report
 
 ```
-### Survey webhook 摘要
-- 框架: [Next.js / Node / React / Vue / HTML]
-- 推送路径: [Server Action / Express / 客户端 fetch]
-- 字段: email ← [前端名]；q_1 ← …；q_N ← …
-- 文件: [路径]
+### Survey webhook summary
+- Framework: [Next.js / Node / React / Vue / HTML]
+- Push path: [Server Action / Express / client fetch]
+- Fields: email ← [frontend name]; q_1 ← …; q_N ← …
+- Files: [paths]
 
-### 核对
-- [ ] 后台已开 Webhook；URL 与 Secret 来自该 Survey
-- [ ] answers 键为 q_1…q_N；多选为 string[]
-- [ ] Secret 不在客户端 bundle（除非已声明无后端）
-- [ ] 真实提交后 Survey 后台能看到这条
+### Checks
+- [ ] Webhook is on in admin; URL and Secret belong to this Survey
+- [ ] answers keys are q_1…q_N; multi-select is string[]
+- [ ] Secret is in a server env var (or a declared no-backend exception)
+- [ ] A real submit shows up in the Survey admin
 
-### 更新后的代码
-[修改后的完整文件，不是 diff]
+### Updated files
+[full file after the change, not a diff]
 ```
 
-**完成**：摘要填齐；有改文件则贴出全文。
+**Done when**: the summary is filled; every changed file is pasted in full.
