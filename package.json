@@ -1,0 +1,24 @@
+{
+  "name": "wapitee-skills",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agent skills for Wapitee TyphoonX tracking, Survey webhooks, and console watermarking.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wapitee-Interactive-Marketing-Limited/wptskill"
+  },
+  "license": "MIT",
+  "scripts": {
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "version-packages": "changeset version"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.2"
+  },
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": "24.x"
+  }
+}
