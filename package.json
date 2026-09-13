@@ -5,7 +5,7 @@
   "description": "Agent skills for Wapitee TyphoonX tracking, Survey webhooks, and console watermarking.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wapitee-Interactive-Marketing-Limited/wptskill"
+    "url": "https://github.com/Wapitee-Interactive-Marketing-Limited/skills"
   },
   "license": "MIT",
   "scripts": {

@@ -5,7 +5,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "Wapitee-Interactive-Marketing-Limited/wptskill"
+      "repo": "Wapitee-Interactive-Marketing-Limited/skills"
     }
   ],
   "commit": false,

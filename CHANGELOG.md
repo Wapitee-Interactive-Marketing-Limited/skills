@@ -4,7 +4,7 @@
 
 ### Major Changes
 
-- [`b3a4b60`](https://github.com/Wapitee-Interactive-Marketing-Limited/wptskill/commit/b3a4b60c9ffc9f6018388f90a9929c0d2b64d555) Thanks [@ysj151215](https://github.com/ysj151215)! - First versioned release of the Wapitee agent skill catalog.
+- [`b3a4b60`](https://github.com/Wapitee-Interactive-Marketing-Limited/skills/commit/b3a4b60c9ffc9f6018388f90a9929c0d2b64d555) Thanks [@ysj151215](https://github.com/ysj151215)! - First versioned release of the Wapitee agent skill catalog.
   
   These skills encode the contracts agents cannot guess: `TPX-` merchant IDs, `q_N` survey answer keys, and the official console watermark CDN. The agent must stop, collect real IDs from [wapitee.io/admin](https://wapitee.io/admin), and implement one helper against a fixed payload.
   
@@ -16,5 +16,5 @@
   Install:
   
   ```bash
-  npx skills@latest add Wapitee-Interactive-Marketing-Limited/wptskill
+  npx skills@latest add Wapitee-Interactive-Marketing-Limited/skills
   ```

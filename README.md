@@ -1,6 +1,6 @@
 # Skills For Wapitee
 
-[![skills.sh](https://skills.sh/b/Wapitee-Interactive-Marketing-Limited/wptskill)](https://skills.sh/Wapitee-Interactive-Marketing-Limited/wptskill)
+[![skills.sh](https://skills.sh/b/Wapitee-Interactive-Marketing-Limited/skills)](https://skills.sh/Wapitee-Interactive-Marketing-Limited/skills)
 
 Agent skills for Wapitee tracking, Survey webhooks, and brand watermarking.
 
@@ -9,7 +9,7 @@ These skills encode the contracts agents cannot guess: `TPX-` merchant IDs, `q_N
 ## Install
 
 ```bash
-npx skills@latest add Wapitee-Interactive-Marketing-Limited/wptskill
+npx skills@latest add Wapitee-Interactive-Marketing-Limited/skills
 ```
 
 ## Why use it?
