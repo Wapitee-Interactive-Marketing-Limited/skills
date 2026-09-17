@@ -1,5 +1,11 @@
 # wapitee-skills
 
+## 1.1.0
+
+### Minor Changes
+
+- [`6d4f927`](https://github.com/Wapitee-Interactive-Marketing-Limited/skills/commit/6d4f9278971752bc779885271ef7c122a66b66c8) Thanks [@ysj151215](https://github.com/ysj151215)! - Retarget the Hydrogen TyphoonX skill to install `@wapitee/typhoonx-hydrogen` instead of inlining a subscriber.
+
 ## 1.0.0
 
 ### Major Changes
