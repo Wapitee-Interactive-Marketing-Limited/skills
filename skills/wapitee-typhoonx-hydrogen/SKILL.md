@@ -1,22 +1,29 @@
 ---
 name: wapitee-typhoonx-hydrogen
-description: "TyphoonX Hydrogen. Wire or audit Wapitee tracking on a Shopify Hydrogen storefront via Analytics subscribe."
+description: "TyphoonX Hydrogen. Wire, audit, or migrate @wapitee/typhoonx-hydrogen on a Shopify Hydrogen storefront."
 ---
 
-# TyphoonX
+# TyphoonX Hydrogen
 
-Wapitee on-site tracking on a Hydrogen storefront. The browser sends a JSON Blob via `sendBeacon` to `https://spell.typhoonx.io/api/v1/receive`. Event names and ecommerce params follow GA4's shape.
+On-site tracking on a Hydrogen storefront via the Package `@wapitee/typhoonx-hydrogen`.
 
-## 1. Collect inputs
+## 1. Gate
 
-Stop when any required input is missing; list every gap in one pass. Merchant ID and Shop ID come from admin. Scan the repo first; skip questions existing env already answers.
+Use `wapitee-typhoonx` when `@shopify/hydrogen` is absent.
+
+Read the Package: `peerDependencies["@shopify/hydrogen"]` and the subscribe list. The repo's Hydrogen must meet the peer. Every event the user named must be on that list; a miss is a Package gap.
+
+**Done when**: `@shopify/hydrogen` is present and meets the peer, and every named event is on the subscribe list (or none were named). When Hydrogen is absent, `wapitee-typhoonx` is the recipe.
+
+## 2. Collect inputs
+
+Stop when any required input is missing; list every gap in one pass. Scan the repo first; skip questions existing env already answers.
 
 | Input | Required | Rule |
 |------|------|------|
-| `TYPHOONX_MERCHANT_ID` | yes | Must start with `TPX-`. Source: wapitee.io/admin → TyphoonX > Merchant Management |
-| Tracked actions | yes | Implement the requested events from the contract table |
-| `SHOP_ID` | no | Use `''` when absent |
-| `COOKIE_DOMAIN` | no | Only when `__typhoon_client_id` is shared across subdomains |
+| Merchant ID | yes | Must start with `TPX-`. Env: `PUBLIC_TYPHOONX_MERCHANT_ID`. Source: wapitee.io/admin → TyphoonX > Merchant Management |
+| Shop ID | yes | Env: `PUBLIC_TYPHOONX_SHOP_ID`. Else the root loader `shop` id, numeric (parse a GID when present). Else ask for the Shopify shop id |
+| Cookie domain | no | Env: `PUBLIC_TYPHOONX_COOKIE_DOMAIN`. Only when `__typhoon_client_id` is shared across subdomains |
 
 Ask for the Merchant ID:
 
@@ -24,74 +31,72 @@ Ask for the Merchant ID:
 
 A value that does not start with `TPX-` is invalid; ask the user to recopy from admin.
 
-**Done when**: Merchant ID is `TPX-…` and the event list is present.
+**Done when**: Merchant ID is `TPX-…` and Shop ID is a non-empty shop id.
 
-## 2. Classify the repo
+## 3. Classify
 
-Stop when `@shopify/hydrogen` is absent.
+Assign exactly one state:
 
 | State | Signal |
 |------|------|
-| present | `spell.typhoonx.io`, `sendTyphoonx`, or `register('TyphoonX')` |
-| missing | none of those |
+| canonical | `@wapitee/typhoonx-hydrogen` is a dependency and the storefront imports it |
+| leftover | App source (not `node_modules`) has `sendTyphoonx`, a `sendBeacon` to the collector, or `register('TyphoonX')` whose implementation is not the Package |
+| missing | neither |
+| dual | canonical and leftover |
 
-present → patch the existing **subscribe** to the contract. missing → once inputs are complete, write from [hydrogen.md](hydrogen.md).
-
-**Done when**: state is present or missing.
-
-## 3. Contract
-
-Every event **payload** carries these 8 fields:
-
-| Field | Source |
-|------|------|
-| `event` | `snake_case` name from the table below |
-| `merchant_id` | `TYPHOONX_MERCHANT_ID` |
-| `shop_id` | `SHOP_ID` or `''` |
-| `client_id` | cookie `__typhoon_client_id`; if absent, `crypto.randomUUID()` and a session cookie (`path=/; SameSite=Lax`, plus `domain` when `COOKIE_DOMAIN` is set) |
-| `referrer` | previous page href (first load: `document.referrer`) |
-| `request_page_url` | Analytics `data.url` when present, else `window.location.href` |
-| `timestamp` | `new Date().toISOString()` |
-| `user_agent` | `navigator.userAgent` |
-
-Transport: `navigator.sendBeacon(url, new Blob([JSON.stringify(payload)], { type: 'application/json' }))`.
-
-| Action | Event | Required | Optional |
-|------|------|------|------|
-| Page view | `page_view` | — | — |
-| View item | `view_item` | `currency`, `items`, `value` | — |
-| Add to cart | `add_to_cart` | `currency`, `items`, `value` | — |
-| Remove from cart | `remove_from_cart` | `currency`, `items`, `value` | — |
-
-Each `items` entry has `item_id`, `item_name`, `price`, `quantity` (plus `item_brand` / `item_category` as needed). `item_id` is `parseGid(product.id).id`.
-
-**Done when**: every requested action has an event name and its required params.
+**Done when**: state is exactly one row.
 
 ## 4. Write
 
-Read [hydrogen.md](hydrogen.md). One **subscribe** component inside `Analytics.Provider`; transport helper only. Implement only the requested events. Wire env vars in the same step. `createContentSecurityPolicy` needs `connectSrc: ['https://spell.typhoonx.io']` (it merges with defaults).
+Make Canonical wiring true in one pass:
 
-**Done when**: the contract payload is sent for every requested event via **subscribe**.
+- Dependency `@wapitee/typhoonx-hydrogen` (same package manager as the repo)
+- Public TyphoonX env and `Env` in `env.d.ts`
+- Package default export mounted inside `Analytics.Provider`; props from `import.meta.env.PUBLIC_TYPHOONX_*` (`cookieDomain` only when that env is set)
+- When the project calls `createContentSecurityPolicy`, `connectSrc` includes the Package collector origin (it merges with defaults)
+- The Package is the only sender: leftover `sendTyphoonx` / inlined helper / local `register('TyphoonX')` is gone in this pass
+
+```
+PUBLIC_TYPHOONX_MERCHANT_ID=
+PUBLIC_TYPHOONX_SHOP_ID=
+PUBLIC_TYPHOONX_COOKIE_DOMAIN=
+```
+
+```tsx
+import TyphoonX from '@wapitee/typhoonx-hydrogen';
+
+<Analytics.Provider cart={cart} consent={consent} shop={shop}>
+  <TyphoonX
+    merchantId={import.meta.env.PUBLIC_TYPHOONX_MERCHANT_ID}
+    shopId={import.meta.env.PUBLIC_TYPHOONX_SHOP_ID}
+  />
+</Analytics.Provider>
+```
+
+If the root layout has no `Analytics.Provider`, add Hydrogen's using the existing `cart` / `consent` / `shop` from the root loader.
+
+**Done when**: Canonical wiring holds and the Package is the only sender.
 
 ## 5. Report
 
 ```
 ### TyphoonX tracking summary
 - Merchant ID: [TPX-…]
-- Shop ID: [value or empty]
-- Framework: Hydrogen
-- Events: [event names actually written]
+- Shop ID: [value]
+- State: [missing → canonical | leftover → canonical | dual → canonical | canonical]
+- Events: [Package subscribe list]
 - Files: [paths]
 
 ### Checks
-- [ ] payload has the eight base fields; event names are snake_case
-- [ ] events come from useAnalytics subscribe; callback `data` is unannotated
-- [ ] items (if present) have item_id, item_name, price, quantity
-- [ ] __typhoon_client_id is written; domain is set when sharing across subdomains
-- [ ] Network: spell.typhoonx.io/api/v1/receive returns 200
+- [ ] `@wapitee/typhoonx-hydrogen` is a dependency and the storefront imports it
+- [ ] `<TyphoonX />` is a child of `Analytics.Provider`
+- [ ] merchantId / shopId come from PUBLIC_TYPHOONX_* env (cookieDomain only when set)
+- [ ] the Package is the only TyphoonX sender
+- [ ] createContentSecurityPolicy connectSrc includes the Package collector origin (when CSP is set)
+- [ ] Network: collector returns 200
 
 ### Updated files
-[subscriber in full; other paths listed]
+[mount site in full; other paths listed]
 ```
 
-**Done when**: the summary is filled; the subscriber is pasted in full.
+**Done when**: the summary is filled; the mount site is pasted in full.

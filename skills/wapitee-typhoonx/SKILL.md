@@ -1,6 +1,6 @@
 ---
 name: wapitee-typhoonx-setup
-description: "TyphoonX. Wire Wapitee event tracking on a web project (sendBeacon, snake_case); map business actions to standard events; audit an existing tracker for payload and client_id."
+description: "TyphoonX. Wire or audit sendBeacon tracking on Next.js, React, Vue, or HTML; map actions to snake_case events."
 ---
 
 # TyphoonX
@@ -8,6 +8,8 @@ description: "TyphoonX. Wire Wapitee event tracking on a web project (sendBeacon
 Wapitee on-site tracking. The browser sends a JSON Blob via `sendBeacon` to `https://spell.typhoonx.io/api/v1/receive`. Event names and ecommerce params follow GA4's shape, as TyphoonX events.
 
 ## 1. Collect inputs
+
+Use `wapitee-typhoonx-hydrogen` when the repo depends on `@shopify/hydrogen`.
 
 Stop when any required input is missing; list every gap in one pass. Merchant ID and Shop ID come from admin. Scan the repo first; skip questions the framework or existing env already answers.
 
@@ -26,7 +28,7 @@ Ask for the Merchant ID:
 
 A value that does not start with `TPX-` is invalid; ask the user to recopy from admin.
 
-**Done when**: Merchant ID is `TPX-…`, and framework, site type, and the event list are present.
+**Done when**: `wapitee-typhoonx-hydrogen` is the recipe, or Merchant ID is `TPX-…` and framework, site type, and the event list are present.
 
 ## 2. Classify the repo
 
