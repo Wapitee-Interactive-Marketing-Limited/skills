@@ -17,7 +17,7 @@ An agent recipe: stop, collect real IDs, and wire the canonical integration. It 
 _Avoid_: SDK, library, copying a subscriber into the storefront
 
 **Package**:
-`@wapitee/typhoonx-hydrogen` is the Hydrogen tracker implementation.
+`@wapitee/typhoonx-hydrogen` is the Hydrogen tracker implementation; `@wapitee/typhoonx-react` is the React / Next.js one.
 _Avoid_: inlined `TyphoonX.tsx`, `sendTyphoonx` in the storefront
 
 **Canonical Hydrogen wiring**:
@@ -33,7 +33,7 @@ Storefront-owned TyphoonX send or subscribe code (`sendTyphoonx`, inlined helper
 _Avoid_: patch-in-place, dual senders
 
 **Public TyphoonX env**:
-`PUBLIC_TYPHOONX_MERCHANT_ID`, `PUBLIC_TYPHOONX_SHOP_ID`, and optional `PUBLIC_TYPHOONX_COOKIE_DOMAIN`. These are the storefront values passed as Package props.
+`PUBLIC_TYPHOONX_MERCHANT_ID`, `PUBLIC_TYPHOONX_SHOP_ID`, and optional `PUBLIC_TYPHOONX_COOKIE_DOMAIN` / `PUBLIC_TYPHOONX_MEASUREMENT_ID`. These are the storefront values passed as Package props. React uses the same names under the framework prefix (`NEXT_PUBLIC_`, `VITE_`).
 _Avoid_: literal `TPX-…` in component source
 
 **Package event contract**:

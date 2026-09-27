@@ -11,7 +11,7 @@ On-site tracking on a Hydrogen storefront via the Package `@wapitee/typhoonx-hyd
 
 Use `wapitee-typhoonx` when `@shopify/hydrogen` is absent.
 
-Read the Package: `peerDependencies["@shopify/hydrogen"]` and the subscribe list. The repo's Hydrogen must meet the peer. Every event the user named must be on that list; a miss is a Package gap.
+Read the Package: `peerDependencies["@shopify/hydrogen"]` and the subscribe list. The repo's `dependencies["@shopify/hydrogen"]` must meet that peer. Every event the user named must be on that list; a miss is a Package gap.
 
 **Done when**: `@shopify/hydrogen` is present and meets the peer, and every named event is on the subscribe list (or none were named). When Hydrogen is absent, `wapitee-typhoonx` is the recipe.
 
@@ -23,7 +23,8 @@ Stop when any required input is missing; list every gap in one pass. Scan the re
 |------|------|------|
 | Merchant ID | yes | Must start with `TPX-`. Env: `PUBLIC_TYPHOONX_MERCHANT_ID`. Source: wapitee.io/admin → TyphoonX > Merchant Management |
 | Shop ID | yes | Env: `PUBLIC_TYPHOONX_SHOP_ID`. Else the root loader `shop` id, numeric (parse a GID when present). Else ask for the Shopify shop id |
-| Cookie domain | no | Env: `PUBLIC_TYPHOONX_COOKIE_DOMAIN`. Only when `__typhoon_client_id` is shared across subdomains |
+| Cookie domain | no | Env: `PUBLIC_TYPHOONX_COOKIE_DOMAIN`. The Package defaults `__typhoon_client_id` to the apex domain (`.example.com`); set only when that default is wrong |
+| GA4 measurement ID | no | Env: `PUBLIC_TYPHOONX_MEASUREMENT_ID`. Must start with `G-`. Only when the storefront runs GA4 |
 
 Ask for the Merchant ID:
 
@@ -31,7 +32,7 @@ Ask for the Merchant ID:
 
 A value that does not start with `TPX-` is invalid; ask the user to recopy from admin.
 
-**Done when**: Merchant ID is `TPX-…` and Shop ID is a non-empty shop id.
+**Done when**: Merchant ID is `TPX-…`, Shop ID is a non-empty shop id, and a set measurement ID is `G-…`.
 
 ## 3. Classify
 
@@ -52,7 +53,8 @@ Make Canonical wiring true in one pass:
 
 - Dependency `@wapitee/typhoonx-hydrogen` (same package manager as the repo)
 - Public TyphoonX env and `Env` in `env.d.ts`
-- Package default export mounted inside `Analytics.Provider`; props from `import.meta.env.PUBLIC_TYPHOONX_*` (`cookieDomain` only when that env is set)
+- Root loader reads `PUBLIC_TYPHOONX_*` from `context.env` and returns them as `typhoonx` (cookieDomain` / `measurementId` only when their env is set)
+- Package default export mounted inside `Analytics.Provider`, props spread from loader `typhoonx`
 - When the project calls `createContentSecurityPolicy`, `connectSrc` includes the Package collector origin (it merges with defaults)
 - The Package is the only sender: leftover `sendTyphoonx` / inlined helper / local `register('TyphoonX')` is gone in this pass
 
@@ -60,16 +62,26 @@ Make Canonical wiring true in one pass:
 PUBLIC_TYPHOONX_MERCHANT_ID=
 PUBLIC_TYPHOONX_SHOP_ID=
 PUBLIC_TYPHOONX_COOKIE_DOMAIN=
+PUBLIC_TYPHOONX_MEASUREMENT_ID=
 ```
 
 ```tsx
 import TyphoonX from '@wapitee/typhoonx-hydrogen';
 
-<Analytics.Provider cart={cart} consent={consent} shop={shop}>
-  <TyphoonX
-    merchantId={import.meta.env.PUBLIC_TYPHOONX_MERCHANT_ID}
-    shopId={import.meta.env.PUBLIC_TYPHOONX_SHOP_ID}
-  />
+export async function loader({context}: Route.LoaderArgs) {
+  const {env} = context;
+
+  return {
+    // ...existing data
+    typhoonx: {
+      merchantId: env.PUBLIC_TYPHOONX_MERCHANT_ID,
+      shopId: env.PUBLIC_TYPHOONX_SHOP_ID,
+    },
+  };
+}
+
+<Analytics.Provider cart={data.cart} consent={data.consent} shop={data.shop}>
+  <TyphoonX {...data.typhoonx} />
 </Analytics.Provider>
 ```
 
@@ -90,10 +102,11 @@ If the root layout has no `Analytics.Provider`, add Hydrogen's using the existin
 ### Checks
 - [ ] `@wapitee/typhoonx-hydrogen` is a dependency and the storefront imports it
 - [ ] `<TyphoonX />` is a child of `Analytics.Provider`
-- [ ] merchantId / shopId come from PUBLIC_TYPHOONX_* env (cookieDomain only when set)
+- [ ] merchantId / shopId reach `<TyphoonX />` from PUBLIC_TYPHOONX_* env via the root loader (cookieDomain / measurementId only when set)
 - [ ] the Package is the only TyphoonX sender
 - [ ] createContentSecurityPolicy connectSrc includes the Package collector origin (when CSP is set)
-- [ ] Network: collector returns 200
+- [ ] Console: no `[TyphoonX] <TyphoonX> must be rendered inside <Analytics.Provider>`
+- [ ] Network: with tracking consent granted, collector returns 200
 
 ### Updated files
 [mount site in full; other paths listed]

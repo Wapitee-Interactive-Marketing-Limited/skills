@@ -20,7 +20,7 @@ These skills make the agent stop, collect the real IDs from [wapitee.io/admin](h
 
 ## Reference
 
-- **[wapitee-typhoonx](./skills/wapitee-typhoonx/SKILL.md)** — TyphoonX on Next.js, React, Vue, or HTML: one `sendBeacon` helper, snake_case events, audit payload and `client_id`.
+- **[wapitee-typhoonx](./skills/wapitee-typhoonx/SKILL.md)** — TyphoonX React: wire, audit, or migrate `@wapitee/typhoonx-react` on Next.js or React.
 - **[wapitee-typhoonx-hydrogen](./skills/wapitee-typhoonx-hydrogen/SKILL.md)** — TyphoonX Hydrogen: wire, audit, or migrate `@wapitee/typhoonx-hydrogen`.
 - **[wapitee-survey-webhook](./skills/wapitee-survey-webhook/SKILL.md)** — POST a site form to Wapitee Survey with `q_N` answers; audit Secret and payload.
 - **[wapitee-watermark](./skills/wapitee-watermark/SKILL.md)** — Inject, diagnose, or migrate the console easter-egg CDN in the entry `<head>`.
