@@ -24,7 +24,7 @@ Stop when any required input is missing; list every gap in one pass. Scan the re
 | Merchant ID | yes | Must start with `TPX-`. Env: `*_TYPHOONX_MERCHANT_ID`. Source: wapitee.io/admin → TyphoonX > Merchant Management |
 | Consent | yes | A boolean from the repo's existing consent banner / CMP state. With none, ask whether tracking runs unconditionally (`true`) |
 | Tracked actions | yes | Map each to a method in step 3 |
-| Shop ID | no | Env: `*_TYPHOONX_SHOP_ID`. `''` when absent |
+| Shop ID | no | Env: `*_TYPHOONX_SHOP_ID`. Source: the Shopify store, when the site has one. `''` when absent |
 | Cookie domain | no | Env: `*_TYPHOONX_COOKIE_DOMAIN`. The Package defaults `__typhoon_client_id` to the apex domain (`.example.com`); set only when that default is wrong |
 | GA4 measurement ID | no | Env: `*_TYPHOONX_MEASUREMENT_ID`. Must start with `G-`. Only when the site runs GA4; reuse the repo's existing `G-…` id |
 

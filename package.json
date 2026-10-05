@@ -7,7 +7,6 @@
     "type": "git",
     "url": "https://github.com/Wapitee-Interactive-Marketing-Limited/skills"
   },
-  "license": "MIT",
   "scripts": {
     "changeset": "changeset",
     "release": "changeset publish",
