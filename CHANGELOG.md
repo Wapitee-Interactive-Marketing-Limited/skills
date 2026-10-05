@@ -1,5 +1,11 @@
 # wapitee-skills
 
+## 2.0.1
+
+### Patch Changes
+
+- [`74aa9a6`](https://github.com/Wapitee-Interactive-Marketing-Limited/skills/commit/74aa9a6ee84c9c4339d9ada5a6157efbe71bb447) Thanks [@ysj151215](https://github.com/ysj151215)! - `wapitee-typhoonx` names the Shopify store as the Shop ID source, and the unused `tracker.md` (the hand-written `sendBeacon` helper removed in 2.0.0) is deleted.
+
 ## 2.0.0
 
 ### Major Changes
