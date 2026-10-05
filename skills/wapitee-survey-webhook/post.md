@@ -2,11 +2,12 @@
 
 Write this helper after inputs are complete. Replace the constants from the table below; form submit calls `submitSurvey` only.
 
-| Framework | File | Constants |
-|------|------|------|
-| Next.js App Router | `app/actions/survey.ts`, `'use server'` at the top | `process.env.WAPITEE_SURVEY_WEBHOOK_URL` / `WAPITEE_SURVEY_WEBHOOK_SECRET`; write `.env.local` in the same step |
-| Node / Express | Server route (e.g. `routes/survey.js`) as a proxy | Same env names; write `.env` |
-| React / Vue / HTML (no backend) | `lib/surveyWebhook.ts` or a page `<script>` | Literals the user supplied; Secret will appear in source |
+| Framework                                                       | File                                                                                                          | Constants                                                                                                       |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Next.js App Router                                              | `app/actions/survey.ts`, `'use server'` at the top                                                            | `process.env.WAPITEE_SURVEY_WEBHOOK_URL` / `WAPITEE_SURVEY_WEBHOOK_SECRET`; write `.env.local` in the same step |
+| Node / Express                                                  | Server route (e.g. `routes/survey.js`) as a proxy                                                             | Same env names; write `.env`                                                                                    |
+| Other server (Next.js Pages Router, Nuxt, Remix / React Router) | The framework's server route or action (`pages/api/survey.ts`, `server/api/survey.post.ts`, a route `action`) | Same env names, in the framework's env file                                                                     |
+| React / Vue / HTML (no backend)                                 | `lib/surveyWebhook.ts` or a page `<script>`                                                                   | Literals the user supplied; Secret will appear in source                                                        |
 
 ```ts
 const WEBHOOK_URL = /* from the table */;
@@ -52,4 +53,4 @@ WAPITEE_SURVEY_WEBHOOK_URL=
 WAPITEE_SURVEY_WEBHOOK_SECRET=
 ```
 
-Express calls `submitSurvey` from the route and returns 502 to the caller when the upstream status is not 2xx. Vue may `export function useSurveyWebhook() { return { submitSurvey } }`.
+A server route (Express, API route, Nuxt server route) calls `submitSurvey` and returns 502 to the caller when the upstream status is not 2xx. Vue may `export function useSurveyWebhook() { return { submitSurvey } }`.
